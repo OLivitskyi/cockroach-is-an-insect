@@ -1,4 +1,4 @@
-package types
+package antfarm
 
 type Combination struct {
 	paths [][]*Vertex

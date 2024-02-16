@@ -1,4 +1,4 @@
-package types
+package antfarm
 
 import (
 	"fmt"
@@ -51,29 +51,6 @@ func numberOfEdges() int {
 		count += len(edges)
 	}
 	return count
-}
-
-func (g *graph) SortDiagonally() {
-	for i := 0; i < len(g.Vertices)-1; i++ {
-		for j := i + 1; j < len(g.Vertices); j++ {
-			pos1 := g.Vertices[i].Position
-			pos2 := g.Vertices[j].Position
-			if pos1.Y > pos2.Y || pos1.Y == pos2.Y && pos1.X > pos2.X {
-				g.Vertices[i], g.Vertices[j] = g.Vertices[j], g.Vertices[i]
-			}
-		}
-	}
-}
-
-func (g *graph) SortByDensest() {
-	// Sort by number of edges; with more edges in front
-	for i := 0; i < len(g.Vertices)-1; i++ {
-		for j := i + 1; j < len(g.Vertices); j++ {
-			if len(g.Vertices[i].Edges) > len(g.Vertices[j].Edges) {
-				g.Vertices[i], g.Vertices[j] = g.Vertices[j], g.Vertices[i]
-			}
-		}
-	}
 }
 
 var Graph = &graph{

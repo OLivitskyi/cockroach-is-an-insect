@@ -1,7 +1,6 @@
-package types
+package antfarm
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -31,7 +30,6 @@ func (paths *paths) String() string {
 }
 
 func (paths *paths) Find() {
-	// Find all paths
 	Explorer.Explore()
 	paths.Sort()
 	paths.Disjoin()
@@ -48,7 +46,6 @@ func (paths *paths) Sort() {
 }
 
 func (paths *paths) Disjoin() {
-	//fmt.Println(paths)
 	var candidates = make(map[int][]Combination)
 	for i, path := range paths.All {
 		var disjoint [][]*Vertex
@@ -58,7 +55,6 @@ func (paths *paths) Disjoin() {
 		}
 		paths.AddCandidates(i, disjoint, &candidates)
 	}
-	//printCombinations(candidates)
 	paths.SelectBest(candidates)
 }
 
@@ -72,23 +68,6 @@ func (paths *paths) AddCandidates(i int, disjoint [][]*Vertex, candidates *map[i
 				(*candidates)[len(disjoint)] = append((*candidates)[len(disjoint)], Combination{paths: disjoint})
 			}
 			paths.AddCandidates(j, disjoint, candidates)
-		}
-	}
-}
-
-func printCombinations(candidates map[int][]Combination) {
-	fmt.Println("Candidates:")
-	for i, combinations := range candidates {
-		fmt.Printf("%d:", i)
-		for _, combination := range combinations {
-			for _, path := range combination.paths {
-				fmt.Printf(" %d(", len(path)-1)
-				for _, vertex := range path {
-					fmt.Printf("%s ", vertex.Name)
-				}
-				fmt.Printf(")")
-			}
-			fmt.Println()
 		}
 	}
 }

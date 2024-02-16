@@ -1,4 +1,4 @@
-package types
+package antfarm
 
 type Pos struct {
 	X int

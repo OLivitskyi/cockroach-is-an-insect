@@ -2,7 +2,7 @@ package main
 
 import (
 	"bufio"
-	"cockroach/src/main/types"
+	"cockroach/src/main/antfarm"
 	"flag"
 	"fmt"
 	"math"
@@ -12,23 +12,11 @@ import (
 	"time"
 )
 
-// >>>>> MAIN >>>>>
 func main() {
 	var (
-		zoomX int
-		zoomY int
-		//visual bool
 		ants             int
 		webVisualisation bool
 	)
-	flag.BoolVar(&webVisualisation, "web", false, "Enable web visualisation")
-	flag.IntVar(&zoomX, "zoomX", 4, "Zoom x dimension to unclutter view")
-	flag.IntVar(&zoomX, "x", 4, "Zoom x dimension to unclutter view")
-	flag.IntVar(&zoomY, "zoomY", 2, "Zoom y dimension to unclutter view")
-	flag.IntVar(&zoomY, "y", 2, "Zoom y dimension to unclutter view")
-	//flag.BoolVar(&visual, "visual", false, "Visualize ants movements through graph")
-	//flag.BoolVar(&visual, "v", false, "Visualize ants movements through graph")
-	flag.IntVar(&ants, "ants", 0, "Number of ants (default 0)")
 	flag.Parse()
 	args := flag.Args()
 	if len(args) == 0 {
@@ -39,46 +27,23 @@ func main() {
 		if fi.Mode()&os.ModeNamedPipe == 0 {
 			fmt.Println("Error: missing filename")
 			fmt.Println("USAGE: go run . [-ants <int>] <filename|path>")
-			fmt.Println("VISUALISATION: go run . [-ants <int>] <filename|path> | go run . [-zoomX <int>|-x <int>] [-zoomY <int>|-y <int>]")
 			os.Exit(1)
 		}
 	}
 
-	types.Ants.Number = ants
-
+	antfarm.Ants.Number = ants
 	start := time.Now()
 	fileName := parseInput(args)
 
-	types.Paths.Find()
-	//printBestPaths()
-	types.Ants.Distribute()
-	types.Graph.Time = time.Since(start)
-	//printDistribution()
+	antfarm.Paths.Find()
+	antfarm.Ants.Distribute()
+	antfarm.Graph.Time = time.Since(start)
 	printInput(fileName, webVisualisation)
-	types.Ants.Move(webVisualisation)
-
+	antfarm.Ants.Move(webVisualisation)
 	fmt.Println()
-	fmt.Printf("Moved %d ants along %v disjoint paths in %v turns.\n", types.Ants.Number, len(types.Graph.Paths), types.Graph.Turns)
-	fmt.Printf("Found altogether %v paths, %v best paths in %v.\n", len(types.Paths.All), len(types.Graph.Paths), types.Graph.Time)
-	fmt.Println("To see visualisation, follow instructions in readme.\n")
-
 }
 
-// >>>>> SENDING ANTS >>>>>
-func printDistribution() {
-	fmt.Println("Distribution:")
-	for i, queue := range types.Ants.Queues {
-		fmt.Printf("Queue %d (%d): ", i, len(queue))
-		for _, ant := range queue {
-			fmt.Printf("%s, ", ant.Name)
-		}
-		fmt.Println()
-	}
-}
-
-// >>>>> PARSING >>>>>
 func parseInput(args []string) string {
-	// Parse input
 	var file *os.File
 	fileName := ""
 	var scanner *bufio.Scanner
@@ -89,24 +54,22 @@ func parseInput(args []string) string {
 	} else {
 		scanner = bufio.NewScanner(os.Stdin)
 	}
-	// Parse ants
 	scanner.Scan()
 	line := scanner.Text()
 	getAnts(line)
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "#") {
-			// Set start and end vertices
 			if line == "##start" || line == "##end" {
 				scanner.Scan()
 				nextLine := scanner.Text()
 				vertex := setVertex(nextLine)
-				vertex.Capacity = types.Ants.Number
+				vertex.Capacity = antfarm.Ants.Number
 				if line == "##start" {
-					types.Graph.Start = vertex
-					types.StartJSON = vertex.Name
+					antfarm.Graph.Start = vertex
+					antfarm.StartJSON = vertex.Name
 				} else {
-					types.Graph.End = vertex
+					antfarm.Graph.End = vertex
 				}
 			}
 		} else if strings.Contains(line, " ") {
@@ -115,8 +78,7 @@ func parseInput(args []string) string {
 			setEdge(line)
 		}
 	}
-	types.Graph.Check()
-	//fmt.Println(types.Graph.Edges)
+	antfarm.Graph.Check()
 	return fileName
 }
 
@@ -141,37 +103,36 @@ func openFile(args []string) (*os.File, string) {
 func getAnts(line string) {
 	number, err := strconv.Atoi(line)
 	if err != nil {
-		types.FaultyData(fmt.Sprintf("invalid number of ants: %s", line))
+		antfarm.FaultyData(fmt.Sprintf("invalid number of ants: %s", line))
 	}
 
 	if !FlagIsPassed("ants") {
-		types.Ants.Number = number
+		antfarm.Ants.Number = number
 	}
-	number = types.Ants.Number
+	number = antfarm.Ants.Number
 	if number < 1 || number > math.MaxInt32 {
-		types.FaultyData(fmt.Sprintf("invalid number of ants: %d", number))
+		antfarm.FaultyData(fmt.Sprintf("invalid number of ants: %d", number))
 	}
-	// To be able to get references to ants if turns are already calculated, i.e. automatic visualisation.
-	types.Ants.All = make(map[string]*types.Ant)
+	antfarm.Ants.All = make(map[string]*antfarm.Ant)
 	for i := 0; i < number; i++ {
-		ant := &types.Ant{}
+		ant := &antfarm.Ant{}
 		ant.Name = strconv.Itoa(i + 1)
-		types.Ants.All[ant.Name] = ant
+		antfarm.Ants.All[ant.Name] = ant
 	}
 }
 
-func setVertex(line string) *types.Vertex {
-	vertex := &types.Vertex{
-		Edges:  make(map[*types.Vertex]*types.Path),
-		Sorted: make([]*types.Vertex, 0),
+func setVertex(line string) *antfarm.Vertex {
+	vertex := &antfarm.Vertex{
+		Edges:  make(map[*antfarm.Vertex]*antfarm.Path),
+		Sorted: make([]*antfarm.Vertex, 0),
 	}
 	fields := strings.Split(line, " ")
 	vertex.Name = fields[0]
 	vertex.Position.X, _ = strconv.Atoi(fields[1])
 	vertex.Position.Y, _ = strconv.Atoi(fields[2])
 	vertex.Capacity = 1
-	types.Graph.Vertices = append(types.Graph.Vertices, vertex)
-	types.Graph.Edges[vertex.Name] = []string{}
+	antfarm.Graph.Vertices = append(antfarm.Graph.Vertices, vertex)
+	antfarm.Graph.Edges[vertex.Name] = []string{}
 	return vertex
 }
 
@@ -180,26 +141,25 @@ func setEdge(line string) {
 	v1Name := fields[0]
 	v2Name := fields[1]
 	if v1Name == v2Name {
-		types.FaultyData(fmt.Sprintf("Invalid edge: %s", line))
+		antfarm.FaultyData(fmt.Sprintf("Invalid edge: %s", line))
 	}
-	vertex1 := types.Graph.FindVertex(v1Name)
-	vertex2 := types.Graph.FindVertex(v2Name)
+	vertex1 := antfarm.Graph.FindVertex(v1Name)
+	vertex2 := antfarm.Graph.FindVertex(v2Name)
 	if _, exists := vertex1.Edges[vertex2]; !exists {
-		vertex1.Edges[vertex2] = &types.Path{}
-		vertex2.Edges[vertex1] = &types.Path{}
+		vertex1.Edges[vertex2] = &antfarm.Path{}
+		vertex2.Edges[vertex1] = &antfarm.Path{}
 		vertex1.Sorted = append(vertex1.Sorted, vertex2)
 		vertex2.Sorted = append(vertex2.Sorted, vertex1)
-		types.Graph.Edges[v1Name] = append(types.Graph.Edges[v1Name], v2Name)
-		types.Graph.Edges[v2Name] = append(types.Graph.Edges[v2Name], v1Name)
-		pair := types.EdgePair{
+		antfarm.Graph.Edges[v1Name] = append(antfarm.Graph.Edges[v1Name], v2Name)
+		antfarm.Graph.Edges[v2Name] = append(antfarm.Graph.Edges[v2Name], v1Name)
+		pair := antfarm.EdgePair{
 			V1Name: v1Name,
 			V2Name: v2Name,
 		}
-		types.EdgePairs = append(types.EdgePairs, pair)
+		antfarm.EdgePairs = append(antfarm.EdgePairs, pair)
 	}
 }
 
-// >>>>> PRINTING >>>>>
 func printInput(fileName string, webVisualisation bool) {
 	if !webVisualisation {
 		input, err := os.ReadFile(fileName)
@@ -209,48 +169,11 @@ func printInput(fileName string, webVisualisation bool) {
 		}
 		spec := string(input)
 		i := strings.Index(spec, "\n")
-		fmt.Printf("%d%s\n\n", types.Ants.Number, spec[i:])
-		//fmt.Printf("%s\n\n", string(input))
-	}
-}
-
-func printBestPaths() {
-	fmt.Println("Best paths:")
-	fmt.Println("Ants:", types.Ants.Number, "Turns:", types.Graph.Turns)
-	for i, path := range types.Graph.Paths {
-		fmt.Printf("Path %d (%d): ", i, len(path)-1)
-		for _, vertex := range path {
-			fmt.Printf("%s, ", vertex.Name)
-		}
-		fmt.Println()
-	}
-}
-
-func printTurnData() {
-	for i, turn := range types.Turns.Data {
-		fmt.Printf("Turn %d: in start: %d, in end %d\n", i+1, turn.InStart, turn.InEnd)
-		for ant, vertex := range turn.EnRoute {
-			fmt.Printf("Ant %s: %s\n", ant.Name, vertex.Name)
-		}
-	}
-	for i, path := range types.Graph.Paths {
-		fmt.Printf("Path %d (%d): ", i, len(path))
-		for _, vertex := range path {
-			fmt.Printf("%s, ", vertex.Name)
-		}
-		fmt.Println()
-	}
-	for i, queue := range types.Ants.Queues {
-		fmt.Printf("Queue %d (%d): ", i, len(queue))
-		for _, ant := range queue {
-			fmt.Printf("%s, ", ant.Name)
-		}
-		fmt.Println()
+		fmt.Printf("%d%s\n\n", antfarm.Ants.Number, spec[i:])
 	}
 }
 
 func FlagIsPassed(name string) bool {
-	// Check if a flag is passed
 	found := false
 	flag.Visit(func(f *flag.Flag) {
 		if f.Name == name {
