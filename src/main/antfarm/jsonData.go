@@ -1,6 +1,6 @@
 package antfarm
 
-var AllPaths [][]*Vertex
+var AllPaths [][]*GraphVertex
 
 type EdgePair struct {
 	V1Name string

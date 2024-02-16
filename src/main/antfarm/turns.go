@@ -9,7 +9,7 @@ import (
 type Turn struct {
 	InStart int
 	InEnd   int
-	EnRoute map[*Ant]*Vertex
+	EnRoute map[*Ant]*GraphVertex
 }
 
 func (t *Turn) String() string {
@@ -33,7 +33,7 @@ func (t *turns) Parse(line string) {
 	turn := &Turn{
 		InStart: t.InStart,
 		InEnd:   t.InEnd,
-		EnRoute: make(map[*Ant]*Vertex),
+		EnRoute: make(map[*Ant]*GraphVertex),
 	}
 	fields := strings.Split(strings.Trim(line, " "), " ")
 	for _, field := range fields {
@@ -60,9 +60,9 @@ func (t *turns) Parse(line string) {
 }
 
 func (t *turns) ExtractPaths() {
-	paths := make(map[*Ant][]*Vertex)
+	paths := make(map[*Ant][]*GraphVertex)
 	for _, ant := range Ants.All {
-		paths[ant] = []*Vertex{}
+		paths[ant] = []*GraphVertex{}
 	}
 	for _, turn := range t.Data {
 		for ant, vertex := range turn.EnRoute {
@@ -70,7 +70,7 @@ func (t *turns) ExtractPaths() {
 		}
 	}
 	for ant, path := range paths {
-		path = append([]*Vertex{Graph.Start}, path...)
+		path = append([]*GraphVertex{Graph.Start}, path...)
 		path = append(path, Graph.End)
 		var found bool
 		for i, p := range Graph.Paths {

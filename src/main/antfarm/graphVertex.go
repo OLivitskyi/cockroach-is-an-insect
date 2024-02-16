@@ -4,16 +4,16 @@ import (
 	"math"
 )
 
-type Vertex struct {
+type GraphVertex struct {
 	Name     string
-	Edges    map[*Vertex]*Path
-	Sorted   []*Vertex
+	Edges    map[*GraphVertex]*PathProcessing
+	Sorted   []*GraphVertex
 	Capacity int
-	Position Pos
-	Paths    map[*Vertex][]*Path
+	Position Position
+	Paths    map[*GraphVertex][]*PathProcessing
 }
 
-func (v *Vertex) SortEdgesCross() {
+func (v *GraphVertex) SortEdgesCross() {
 	for i := 0; i < len(v.Sorted)-1; i++ {
 		for j := i + 1; j < len(v.Sorted); j++ {
 			pos1 := v.Sorted[i].Position
@@ -25,7 +25,7 @@ func (v *Vertex) SortEdgesCross() {
 	}
 }
 
-func (v *Vertex) SortEdgesByDegrees() {
+func (v *GraphVertex) SortEdgesByDegrees() {
 	pos0 := v.Position
 	for i := 0; i < len(v.Sorted)-1; i++ {
 		for j := i + 1; j < len(v.Sorted); j++ {
@@ -46,7 +46,7 @@ func (v *Vertex) SortEdgesByDegrees() {
 	}
 }
 
-func sinCos(pos1, pos2 Pos) (float64, float64) {
+func sinCos(pos1, pos2 Position) (float64, float64) {
 	diff := struct{ X, Y float64 }{float64(pos2.X - pos1.X), float64(pos2.Y - pos1.Y)}
 	hypotenuse := math.Hypot(float64(diff.X), float64(diff.Y))
 	sin := diff.Y / hypotenuse
@@ -54,11 +54,11 @@ func sinCos(pos1, pos2 Pos) (float64, float64) {
 	return sin, cos
 }
 
-func linedUp(pos1, pos2 Pos) bool {
+func linedUp(pos1, pos2 Position) bool {
 	return pos1.Y == pos2.Y || pos1.X == pos2.X || diagonal(pos1, pos2)
 }
 
-func diagonal(pos1, pos2 Pos) bool {
+func diagonal(pos1, pos2 Position) bool {
 	return abs(pos1.Y-pos2.Y) == abs(pos1.X-pos2.X)
 }
 

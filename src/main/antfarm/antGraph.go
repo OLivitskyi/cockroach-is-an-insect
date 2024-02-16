@@ -6,18 +6,18 @@ import (
 	"time"
 )
 
-type graph struct {
-	Start    *Vertex
-	End      *Vertex
-	Vertices []*Vertex
+type antGraph struct {
+	Start    *GraphVertex
+	End      *GraphVertex
+	Vertices []*GraphVertex
 	Edges    map[string][]string
-	Paths    [][]*Vertex
+	Paths    [][]*GraphVertex
 	Turns    int
 	Time     time.Duration
 }
 
-func (graph *graph) FindVertex(name string) *Vertex {
-	var found *Vertex
+func (graph *antGraph) FindVertex(name string) *GraphVertex {
+	var found *GraphVertex
 	for _, v := range graph.Vertices {
 		if v.Name == name {
 			found = v
@@ -30,7 +30,7 @@ func (graph *graph) FindVertex(name string) *Vertex {
 	return found
 }
 
-func (graph *graph) Check() {
+func (graph *antGraph) Check() {
 	if len(graph.Vertices) == 0 {
 		FaultyData("no rooms specified")
 	}
@@ -53,10 +53,10 @@ func numberOfEdges() int {
 	return count
 }
 
-var Graph = &graph{
+var Graph = &antGraph{
 	Edges:    make(map[string][]string),
-	Paths:    [][]*Vertex{},
-	Vertices: []*Vertex{},
+	Paths:    [][]*GraphVertex{},
+	Vertices: []*GraphVertex{},
 }
 
 func FaultyData(msg string) {

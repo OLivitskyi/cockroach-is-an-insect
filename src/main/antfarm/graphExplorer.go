@@ -1,23 +1,23 @@
 package antfarm
 
-type explorer struct {
-	visited map[*Vertex]bool
-	current *Vertex
-	path    []*Vertex
+type GraphExplorer struct {
+	visited map[*GraphVertex]bool
+	current *GraphVertex
+	path    []*GraphVertex
 }
 
 type PathData struct {
 	Paths []string `json:"paths"`
 }
 
-func (explorer *explorer) Explore() {
-	var prev *Vertex
+func (explorer *GraphExplorer) Explore() {
+	var prev *GraphVertex
 	if explorer.current == nil {
 		explorer.current = Graph.Start
 	}
 	for v, _ := range explorer.current.Edges {
 		if explorer.current == Graph.Start {
-			explorer.path = []*Vertex{Graph.Start}
+			explorer.path = []*GraphVertex{Graph.Start}
 			explorer.visited[Graph.Start] = true
 		}
 		if !explorer.visited[v] {
@@ -26,7 +26,7 @@ func (explorer *explorer) Explore() {
 			prev = explorer.current
 			explorer.current = v
 			if v == Graph.End {
-				tmp := make([]*Vertex, len(explorer.path))
+				tmp := make([]*GraphVertex, len(explorer.path))
 				copy(tmp, explorer.path)
 				Paths.All = append(Paths.All, tmp)
 				AllPaths = append(AllPaths, tmp)
@@ -42,4 +42,4 @@ func (explorer *explorer) Explore() {
 	}
 }
 
-var Explorer = &explorer{current: Graph.Start, visited: make(map[*Vertex]bool)}
+var Explorer = &GraphExplorer{current: Graph.Start, visited: make(map[*GraphVertex]bool)}

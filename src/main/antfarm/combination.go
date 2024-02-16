@@ -1,7 +1,7 @@
 package antfarm
 
 type Combination struct {
-	paths [][]*Vertex
+	paths [][]*GraphVertex
 }
 
 func (c *Combination) String() string {

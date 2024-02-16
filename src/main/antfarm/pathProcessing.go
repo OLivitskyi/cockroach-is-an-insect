@@ -4,18 +4,18 @@ import (
 	"math"
 )
 
-type Path struct {
-	Positions []Pos
+type PathProcessing struct {
+	Positions []Position
 	Marks     []rune
 }
 
-func (path *Path) Add(pos Pos, mark rune) {
+func (path *PathProcessing) Add(pos Position, mark rune) {
 	path.Positions = append(path.Positions, pos)
 	path.Marks = append(path.Marks, mark)
 }
 
 type paths struct {
-	All [][]*Vertex
+	All [][]*GraphVertex
 }
 
 func (paths *paths) String() string {
@@ -48,7 +48,7 @@ func (paths *paths) Sort() {
 func (paths *paths) Disjoin() {
 	var candidates = make(map[int][]Combination)
 	for i, path := range paths.All {
-		var disjoint [][]*Vertex
+		var disjoint [][]*GraphVertex
 		disjoint = append(disjoint, path)
 		if i == 0 {
 			candidates[1] = []Combination{{paths: disjoint}}
@@ -58,7 +58,7 @@ func (paths *paths) Disjoin() {
 	paths.SelectBest(candidates)
 }
 
-func (paths *paths) AddCandidates(i int, disjoint [][]*Vertex, candidates *map[int][]Combination) {
+func (paths *paths) AddCandidates(i int, disjoint [][]*GraphVertex, candidates *map[int][]Combination) {
 	for j := i + 1; j < len(paths.All); j++ {
 		if paths.areDisjoint(disjoint, paths.All[j]) {
 			disjoint := append(disjoint, paths.All[j])
@@ -89,7 +89,7 @@ func (paths *paths) SelectBest(candidates map[int][]Combination) {
 	}
 }
 
-func (paths *paths) length(disjoint [][]*Vertex) int {
+func (paths *paths) length(disjoint [][]*GraphVertex) int {
 	length := 0
 	for _, path := range disjoint {
 		length += len(path) - 1
@@ -97,7 +97,7 @@ func (paths *paths) length(disjoint [][]*Vertex) int {
 	return length
 }
 
-func (paths *paths) areDisjoint(disjointPaths [][]*Vertex, path2 []*Vertex) bool {
+func (paths *paths) areDisjoint(disjointPaths [][]*GraphVertex, path2 []*GraphVertex) bool {
 	for _, path1 := range disjointPaths {
 		for _, v1 := range path1[1 : len(path1)-1] {
 			for _, v2 := range path2[1 : len(path2)-1] {

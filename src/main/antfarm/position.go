@@ -1,6 +1,6 @@
 package antfarm
 
-type Pos struct {
+type Position struct {
 	X int
 	Y int
 }

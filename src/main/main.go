@@ -90,7 +90,7 @@ func openFile(args []string) (*os.File, string) {
 	fileName := args[0]
 
 	if !strings.Contains(fileName, "/") {
-		fileName = "examples/" + fileName
+		fileName = "resources/" + fileName
 	}
 	file, err := os.Open(fileName)
 	if err != nil {
@@ -121,10 +121,10 @@ func getAnts(line string) {
 	}
 }
 
-func setVertex(line string) *antfarm.Vertex {
-	vertex := &antfarm.Vertex{
-		Edges:  make(map[*antfarm.Vertex]*antfarm.Path),
-		Sorted: make([]*antfarm.Vertex, 0),
+func setVertex(line string) *antfarm.GraphVertex {
+	vertex := &antfarm.GraphVertex{
+		Edges:  make(map[*antfarm.GraphVertex]*antfarm.PathProcessing),
+		Sorted: make([]*antfarm.GraphVertex, 0),
 	}
 	fields := strings.Split(line, " ")
 	vertex.Name = fields[0]
@@ -146,8 +146,8 @@ func setEdge(line string) {
 	vertex1 := antfarm.Graph.FindVertex(v1Name)
 	vertex2 := antfarm.Graph.FindVertex(v2Name)
 	if _, exists := vertex1.Edges[vertex2]; !exists {
-		vertex1.Edges[vertex2] = &antfarm.Path{}
-		vertex2.Edges[vertex1] = &antfarm.Path{}
+		vertex1.Edges[vertex2] = &antfarm.PathProcessing{}
+		vertex2.Edges[vertex1] = &antfarm.PathProcessing{}
 		vertex1.Sorted = append(vertex1.Sorted, vertex2)
 		vertex2.Sorted = append(vertex2.Sorted, vertex1)
 		antfarm.Graph.Edges[v1Name] = append(antfarm.Graph.Edges[v1Name], v2Name)
