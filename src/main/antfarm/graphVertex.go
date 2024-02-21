@@ -18,7 +18,7 @@ func (v *GraphVertex) SortEdgesCross() {
 		for j := i + 1; j < len(v.Sorted); j++ {
 			pos1 := v.Sorted[i].Position
 			pos2 := v.Sorted[j].Position
-			if !linedUp(v.Position, pos1) && linedUp(v.Position, pos2) {
+			if !LinedUp(v.Position, pos1) && LinedUp(v.Position, pos2) {
 				v.Sorted[i], v.Sorted[j] = v.Sorted[j], v.Sorted[i]
 			}
 		}
@@ -31,10 +31,10 @@ func (v *GraphVertex) SortEdgesByDegrees() {
 		for j := i + 1; j < len(v.Sorted); j++ {
 			v1 := v.Sorted[i]
 			pos1 := v1.Position
-			sin1, cos1 := sinCos(pos0, pos1)
+			sin1, cos1 := SinCos(pos0, pos1)
 			v2 := v.Sorted[j]
 			pos2 := v2.Position
-			sin2, cos2 := sinCos(pos0, pos2)
+			sin2, cos2 := SinCos(pos0, pos2)
 			if cos1 < 0 && cos2 > 0 {
 				v.Sorted[i], v.Sorted[j] = v.Sorted[j], v.Sorted[i]
 			} else if (cos1 < 0 && cos2 < 0) || (cos1 > 0 && cos2 > 0) {
@@ -46,7 +46,7 @@ func (v *GraphVertex) SortEdgesByDegrees() {
 	}
 }
 
-func sinCos(pos1, pos2 Position) (float64, float64) {
+func SinCos(pos1, pos2 Position) (float64, float64) {
 	diff := struct{ X, Y float64 }{float64(pos2.X - pos1.X), float64(pos2.Y - pos1.Y)}
 	hypotenuse := math.Hypot(float64(diff.X), float64(diff.Y))
 	sin := diff.Y / hypotenuse
@@ -54,15 +54,15 @@ func sinCos(pos1, pos2 Position) (float64, float64) {
 	return sin, cos
 }
 
-func linedUp(pos1, pos2 Position) bool {
-	return pos1.Y == pos2.Y || pos1.X == pos2.X || diagonal(pos1, pos2)
+func LinedUp(pos1, pos2 Position) bool {
+	return pos1.Y == pos2.Y || pos1.X == pos2.X || Diagonal(pos1, pos2)
 }
 
-func diagonal(pos1, pos2 Position) bool {
-	return abs(pos1.Y-pos2.Y) == abs(pos1.X-pos2.X)
+func Diagonal(pos1, pos2 Position) bool {
+	return Abs(pos1.Y-pos2.Y) == Abs(pos1.X-pos2.X)
 }
 
-func abs(n int) int {
+func Abs(n int) int {
 	if n < 0 {
 		return -n
 	}

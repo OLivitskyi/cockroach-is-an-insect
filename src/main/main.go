@@ -33,7 +33,7 @@ func main() {
 
 	antfarm.Ants.Number = ants
 	start := time.Now()
-	fileName := parseInput(args)
+	fileName, _, _, _ := parseInput(args)
 
 	antfarm.Paths.Find()
 	antfarm.Ants.Distribute()
@@ -43,7 +43,7 @@ func main() {
 	fmt.Println()
 }
 
-func parseInput(args []string) string {
+func parseInput(args []string) (string, string, string, string) {
 	var file *os.File
 	fileName := ""
 	var scanner *bufio.Scanner
@@ -79,7 +79,7 @@ func parseInput(args []string) string {
 		}
 	}
 	antfarm.Graph.Check()
-	return fileName
+	return fileName, "", "", ""
 }
 
 func openFile(args []string) (*os.File, string) {
